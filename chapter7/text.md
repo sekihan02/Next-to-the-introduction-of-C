@@ -24,7 +24,10 @@
 プログラム言語で書かれたソースコードはしょせんコンパイルされる木ねじと素材の集まりです。
 つまり、コードは実行可能な状態であるバイナリファイルにコンパイルされる無ければ何もできません。
 コンパイルされ、a.outのようなマシンごで書かれたバイナリファイルが実行されて初めて機械は動きだします。
-ここからはlinux OS であるraspberrypiを使いCPUの動作を見ていこうと思う
+
+動作は基本的にwindows10を使用するが
+ここからは必要に応じてlinux OS であるraspberrypiも使用してCPUの動作を見ようと思う。
+raspberrypiを使用するときは適宜そのこと記載する
 
 ## 1.3. サンプルコードを動かしてみる
 ---
@@ -61,11 +64,11 @@ clean:
 ```
 makeと実行例は以下
 ```
-$ make -f hello_world.mk 
+>make -f hello_world.mk
 gcc -g -O0 -Wall   -c -o hello_world.o hello_world.c
-gcc -g -O0 -Wall  -o hello_world hello_world.o 
+gcc -g -O0 -Wall  -o hello_world hello_world.o
 rm -f *.o
-$ ./hello_world
+>hello_world.exe
 Hello world
 ```
 
@@ -74,57 +77,209 @@ Hello world
 C言語などでコンパイルを行うとできるバイナリファイルがどのようにコンパイルされているのかを見る方法としてobjdumpがある。
 これを使い、hello_worldの中身を見てみる
 ```
-$ objdump -D hello_world | grep -A20 main.:
-00010464 <main>:
-   10464:	e92d4800 	push	{fp, lr}
-   10468:	e28db004 	add	fp, sp, #4
-   1046c:	e24dd008 	sub	sp, sp, #8
-   10470:	e50b0008 	str	r0, [fp, #-8]
-   10474:	e50b100c 	str	r1, [fp, #-12]
-   10478:	e59f3020 	ldr	r3, [pc, #32]	; 104a0 <main+0x3c>
-   1047c:	e5933000 	ldr	r3, [r3]
-   10480:	e3a0200c 	mov	r2, #12
-   10484:	e3a01001 	mov	r1, #1
-   10488:	e59f0014 	ldr	r0, [pc, #20]	; 104a4 <main+0x40>
-   1048c:	ebffff9e 	bl	1030c <fwrite@plt>
-   10490:	e3a03000 	mov	r3, #0
-   10494:	e1a00003 	mov	r0, r3
-   10498:	e24bd004 	sub	sp, fp, #4
-   1049c:	e8bd8800 	pop	{fp, pc}
-   104a0:	00021028 	andeq	r1, r2, r8, lsr #32
-   104a4:	00010518 	andeq	r0, r1, r8, lsl r5
+>objdump -D hello_world.exe | grep -A20 main.:
+00401460 <_main>:
+  401460:       55                      push   %ebp
+  401461:       89 e5                   mov    %esp,%ebp
+  401463:       83 e4 f0                and    $0xfffffff0,%esp
+  401466:       83 ec 10                sub    $0x10,%esp
+  401469:       e8 62 05 00 00          call   4019d0 <___main>
+  40146e:       a1 a0 81 40 00          mov    0x4081a0,%eax
+  401473:       83 c0 20                add    $0x20,%eax
+  401476:       89 44 24 0c             mov    %eax,0xc(%esp)
+  40147a:       c7 44 24 08 0c 00 00    movl   $0xc,0x8(%esp)
+  401481:       00
+  401482:       c7 44 24 04 01 00 00    movl   $0x1,0x4(%esp)
+  401489:       00
+  40148a:       c7 04 24 64 50 40 00    movl   $0x405064,(%esp)
+  401491:       e8 f2 25 00 00          call   403a88 <_fwrite>
+  401496:       b8 00 00 00 00          mov    $0x0,%eax
+  40149b:       c9                      leave
+  40149c:       c3                      ret
+  40149d:       90                      nop
+  40149e:       90                      nop
+  40149f:       90                      nop
+--
+004019d0 <___main>:
+  4019d0:       a1 28 70 40 00          mov    0x407028,%eax
+  4019d5:       85 c0                   test   %eax,%eax
+  4019d7:       74 07                   je     4019e0 <___main+0x10>
+  4019d9:       f3 c3                   repz ret
+  4019db:       90                      nop
+  4019dc:       8d 74 26 00             lea    0x0(%esi,%eiz,1),%esi
+  4019e0:       c7 05 28 70 40 00 01    movl   $0x1,0x407028
+  4019e7:       00 00 00
+  4019ea:       eb 94                   jmp    401980 <___do_global_ctors>
+  4019ec:       90                      nop
+  4019ed:       90                      nop
+  4019ee:       90                      nop
+  4019ef:       90                      nop
 
-000104a8 <__libc_csu_init>:
-   104a8:	e92d47f0 	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+004019f0 <.text>:
+  4019f0:       83 ec 1c                sub    $0x1c,%esp
+  4019f3:       8b 44 24 24             mov    0x24(%esp),%eax
+  4019f7:       83 f8 03                cmp    $0x3,%eax
+  4019fa:       74 14                   je     401a10 <.text+0x20>
+  4019fc:       85 c0                   test   %eax,%eax
 
 ```
 objdumpは大量の出力をするため指定した文字列を含む行を抽出するgrepを使いobjdumpの出力をmain.:文字列以降最大20行を表示する。
 個人的にintel表示のほうが見やすいので表示する
 ```
-$ objdump -M intel -D hello_world | grep -A20 main.:
-Unrecognised disassembler option: intel
-00010464 <main>:
-   10464:	e92d4800 	push	{fp, lr}
-   10468:	e28db004 	add	fp, sp, #4
-   1046c:	e24dd008 	sub	sp, sp, #8
-   10470:	e50b0008 	str	r0, [fp, #-8]
-   10474:	e50b100c 	str	r1, [fp, #-12]
-   10478:	e59f3020 	ldr	r3, [pc, #32]	; 104a0 <main+0x3c>
-   1047c:	e5933000 	ldr	r3, [r3]
-   10480:	e3a0200c 	mov	r2, #12
-   10484:	e3a01001 	mov	r1, #1
-   10488:	e59f0014 	ldr	r0, [pc, #20]	; 104a4 <main+0x40>
-   1048c:	ebffff9e 	bl	1030c <fwrite@plt>
-   10490:	e3a03000 	mov	r3, #0
-   10494:	e1a00003 	mov	r0, r3
-   10498:	e24bd004 	sub	sp, fp, #4
-   1049c:	e8bd8800 	pop	{fp, pc}
-   104a0:	00021028 	andeq	r1, r2, r8, lsr #32
-   104a4:	00010518 	andeq	r0, r1, r8, lsl r5
+>objdump -M intel -D hello_world.exe | grep -A20 main.:
+00401460 <_main>:
+  401460:       55                      push   ebp
+  401461:       89 e5                   mov    ebp,esp
+  401463:       83 e4 f0                and    esp,0xfffffff0
+  401466:       83 ec 10                sub    esp,0x10
+  401469:       e8 62 05 00 00          call   4019d0 <___main>
+  40146e:       a1 a0 81 40 00          mov    eax,ds:0x4081a0
+  401473:       83 c0 20                add    eax,0x20
+  401476:       89 44 24 0c             mov    DWORD PTR [esp+0xc],eax
+  40147a:       c7 44 24 08 0c 00 00    mov    DWORD PTR [esp+0x8],0xc
+  401481:       00
+  401482:       c7 44 24 04 01 00 00    mov    DWORD PTR [esp+0x4],0x1
+  401489:       00
+  40148a:       c7 04 24 64 50 40 00    mov    DWORD PTR [esp],0x405064
+  401491:       e8 f2 25 00 00          call   403a88 <_fwrite>
+  401496:       b8 00 00 00 00          mov    eax,0x0
+  40149b:       c9                      leave
+  40149c:       c3                      ret
+  40149d:       90                      nop
+  40149e:       90                      nop
+  40149f:       90                      nop
+--
+004019d0 <___main>:
+  4019d0:       a1 28 70 40 00          mov    eax,ds:0x407028
+  4019d5:       85 c0                   test   eax,eax
+  4019d7:       74 07                   je     4019e0 <___main+0x10>
+  4019d9:       f3 c3                   repz ret
+  4019db:       90                      nop
+  4019dc:       8d 74 26 00             lea    esi,[esi+eiz*1+0x0]
+  4019e0:       c7 05 28 70 40 00 01    mov    DWORD PTR ds:0x407028,0x1
+  4019e7:       00 00 00
+  4019ea:       eb 94                   jmp    401980 <___do_global_ctors>
+  4019ec:       90                      nop
+  4019ed:       90                      nop
+  4019ee:       90                      nop
+  4019ef:       90                      nop
 
-000104a8 <__libc_csu_init>:
-   104a8:	e92d47f0 	push	{r4, r5, r6, r7, r8, r9, sl, lr}
+004019f0 <.text>:
+  4019f0:       83 ec 1c                sub    esp,0x1c
+  4019f3:       8b 44 24 24             mov    eax,DWORD PTR [esp+0x24]
+  4019f7:       83 f8 03                cmp    eax,0x3
+  4019fa:       74 14                   je     401a10 <.text+0x20>
+  4019fc:       85 c0                   test   eax,eax
+```
+
+
+## 1.5. GDB
+GDBはデバッガ。
+デバッガはコンパイルされたプログラムのレジスタの内容を確認したり１ステップずつ実行したりできるツール
+以下はプログラム実行直前のレジスタの内容
+```
+>gdb -q ./hello_world.exe
+Reading symbols from C:\Users\akahane\Documents\github\Next_ intro_of_C\chapter7\src\hello_world.exe...done.
+(gdb) set dis intel
+Ambiguous set command "dis intel": disable-randomization, disassemble-next-line, disassembly-flavor, disconnected-dprintf...
+(gdb) break main
+Breakpoint 1 at 0x40146e: file hello_world.c, line 5.
+(gdb) run
+Starting program: C:\Users\akahane\Documents\github\Next_ intro_of_C\chapter7\src/./hello_world.exe
+[New Thread 5864.0x2bc4]
+[New Thread 5864.0x180c]
+
+Breakpoint 1, main (argc=1, argv=0x9415f8) at hello_world.c:5
+5               fprintf(stdout, "Hello world\n");
+(gdb) info registers
+eax            0x1      1
+ecx            0x401950 4200784
+edx            0x0      0
+ebx            0x26c000 2539520
+esp            0x61ff20 0x61ff20
+ebp            0x61ff38 0x61ff38
+esi            0x4012e0 4199136
+edi            0x4012e0 4199136
+eip            0x40146e 0x40146e <main+14>
+eflags         0x202    [ IF ]
+cs             0x23     35
+ss             0x2b     43
+ds             0x2b     43
+es             0x2b     43
+fs             0x53     83
+gs             0x2b     43
+(gdb) quit
+A debugging session is active.
+
+        Inferior 1 [process 5864] will be killed.
+
+Quit anyway? (y or n) y
+
+error return ../../gdb-7.6.1/gdb/windows-nat.c:1275 was 5
 
 ```
-## 1.5. GDB
-GDBはデバッガで
+break mainでmain関数にブレークポイント設定し、runと実行するとmain()が実行される直前で処理が停止する。
+ここでinfo registersとすることでレジスタと現在の状態を見ることができる
+
+set dis intelで出力をIntel形式にすることができる
+また、ディレクトリ内で.gdbinitという名前でファイルを作り、コマンドを書いておくことでGDBを起動するたびに設定を実行できる
+
+| レジスタ | 内容 |
+|---|---|
+| eax | 変数 |
+| ecx | 変数 |
+| edx | 変数 |
+| ebx | 変数 |
+
+```
+>gcc -g hello_world.c
+>gdb -q a.exe
+Reading symbols from C:\Users\akahane\Documents\github\Next_ intro_of_C\chapter7\src\a.exe...done.
+(gdb) set dis intel
+Ambiguous set command "dis intel": disable-randomization, disassemble-next-line, disassembly-flavor, disconnected-dprintf...
+(gdb) list
+1       #include<stdio.h>
+2
+3       int main(int argc, char *argv[])
+4       {
+5               fprintf(stdout, "Hello world\n");
+6               return 0;
+7       }
+(gdb) disassemble main
+Dump of assembler code for function main:
+   0x00401460 <+0>:     push   %ebp
+   0x00401461 <+1>:     mov    %esp,%ebp
+   0x00401463 <+3>:     and    $0xfffffff0,%esp
+   0x00401466 <+6>:     sub    $0x10,%esp
+   0x00401469 <+9>:     call   0x4019d0 <__main>
+   0x0040146e <+14>:    mov    0x4081a0,%eax
+   0x00401473 <+19>:    add    $0x20,%eax
+   0x00401476 <+22>:    mov    %eax,0xc(%esp)
+   0x0040147a <+26>:    movl   $0xc,0x8(%esp)
+   0x00401482 <+34>:    movl   $0x1,0x4(%esp)
+   0x0040148a <+42>:    movl   $0x405064,(%esp)
+   0x00401491 <+49>:    call   0x403a88 <fwrite>
+   0x00401496 <+54>:    mov    $0x0,%eax
+   0x0040149b <+59>:    leave
+   0x0040149c <+60>:    ret
+End of assembler dump.
+(gdb) break main
+Breakpoint 1 at 0x40146e: file hello_world.c, line 5.
+(gdb) run
+Starting program: C:\Users\akahane\Documents\github\Next_ intro_of_C\chapter7\src/a.exe
+[New Thread 8884.0x8cc]
+[New Thread 8884.0x300c]
+
+Breakpoint 1, main (argc=1, argv=0x7315f8) at hello_world.c:5
+5               fprintf(stdout, "Hello world\n");
+(gdb) info registers mov
+Invalid register `mov'
+(gdb) info registers sub
+Invalid register `sub'
+(gdb) info register mov
+Invalid register `mov'
+(gdb) info register eip
+eip            0x40146e 0x40146e <main+14>
+(gdb)
+```
+
