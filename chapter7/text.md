@@ -21,9 +21,9 @@
 
 ## 1.2. 全体像を見る
 ---
-プログラム言語で書かれたソースコードはしょせんコンパイルされる木ねじと素材の集まりです。
-つまり、コードは実行可能な状態であるバイナリファイルにコンパイルされる無ければ何もできません。
-コンパイルされ、a.outのようなマシンごで書かれたバイナリファイルが実行されて初めて機械は動きだします。
+プログラム言語で書かれたソースコードはしょせんコンパイルされる木ねじと素材の集まり。
+つまり、コードは実行可能な状態であるバイナリファイルにコンパイルされる無ければ何もできない
+コンパイルされ、a.outのようなマシンごで書かれたバイナリファイルが実行されて初めて機械は動く
 
 動作は基本的にwindows10を使用するが
 ここからは必要に応じてlinux OS であるraspberrypiも使用してCPUの動作を見ようと思う。
@@ -179,13 +179,13 @@ GDBはデバッガ。
 以下はプログラム実行直前のレジスタの内容
 ```
 >gdb -q ./hello_world.exe
-Reading symbols from C:\Users\akahane\Documents\github\Next_ intro_of_C\chapter7\src\hello_world.exe...done.
+Reading symbols from C:\github\Next_ intro_of_C\chapter7\src\hello_world.exe...done.
 (gdb) set dis intel
 Ambiguous set command "dis intel": disable-randomization, disassemble-next-line, disassembly-flavor, disconnected-dprintf...
 (gdb) break main
 Breakpoint 1 at 0x40146e: file hello_world.c, line 5.
 (gdb) run
-Starting program: C:\Users\akahane\Documents\github\Next_ intro_of_C\chapter7\src/./hello_world.exe
+Starting program: C:\github\Next_ intro_of_C\chapter7\src/./hello_world.exe
 [New Thread 5864.0x2bc4]
 [New Thread 5864.0x180c]
 
@@ -234,7 +234,7 @@ set dis intelで出力をIntel形式にすることができる
 ```
 >gcc -g hello_world.c
 >gdb -q a.exe
-Reading symbols from C:\Users\akahane\Documents\github\Next_ intro_of_C\chapter7\src\a.exe...done.
+Reading symbols from C:\github\Next_ intro_of_C\chapter7\src\a.exe...done.
 (gdb) set dis intel
 Ambiguous set command "dis intel": disable-randomization, disassemble-next-line, disassembly-flavor, disconnected-dprintf...
 (gdb) list
@@ -266,7 +266,7 @@ End of assembler dump.
 (gdb) break main
 Breakpoint 1 at 0x40146e: file hello_world.c, line 5.
 (gdb) run
-Starting program: C:\Users\akahane\Documents\github\Next_ intro_of_C\chapter7\src/a.exe
+Starting program: C:\Next_ intro_of_C\chapter7\src/a.exe
 [New Thread 8884.0x8cc]
 [New Thread 8884.0x300c]
 
@@ -282,4 +282,83 @@ Invalid register `mov'
 eip            0x40146e 0x40146e <main+14>
 (gdb)
 ```
+eipレジスタはプログラムが実行している最中の命令をお保持しているメモリアドレスを指すために使われる
+gdbでポインタの中身を見てみる
+```C
+#include <stdio.h>
+#include <string.h>
+
+int main(int argc, char const *argv[])
+{
+	char str[20];
+	char *pointer;
+	char *ptr;
+	strcpy(str, "Hello, world!\n");
+	pointer = str;
+	fprintf(stdout, "%s", pointer);
+
+	ptr = pointer +2;
+	strcpy(ptr, "y ogottehosiiyade\n");
+	fprintf(stdout, "%s", pointer);
+
+	return 0;
+}
+```
+Makefile作るのが面倒なのでコマンドでコンパイル
+```
+>gcc -g -o pointer pointer.c
+>pointer.exe
+Hello, world!
+Hey ogottehosiiyade
+
+>gdb -q pointer.exe
+Reading symbols from C:\github\Next_ intro_of_C\chapter7\src\pointer.exe...done.
+(gdb) set dis intel
+Ambiguous set command "dis intel": disable-randomization, disassemble-next-line, disassembly-flavor, disconnected-dprintf...
+(gdb) list
+1       #include <stdio.h>
+2       #include <string.h>
+3
+4       int main(int argc, char const *argv[])
+5       {
+6               char str[20];
+7               char *pointer;
+8               char *ptr;
+9               strcpy(str, "Hello, world!\n");
+10              pointer = str;
+(gdb)
+11              fprintf(stdout, "%s", pointer);
+12
+13              ptr = pointer +2;
+14              strcpy(ptr, "y ogottehosiiyade\n");
+15              fprintf(stdout, "%s", pointer);
+16
+17              return 0;
+18      }
+(gdb)
+Line number 19 out of range; pointer.c has 18 lines.
+(gdb) break 11
+Breakpoint 1 at 0x401498: file pointer.c, line 11.
+(gdb) run\
+
+Starting program: C:\github\Next_ intro_of_C\chapter7\src/pointer.exe
+[New Thread 14000.0x1690]
+[New Thread 14000.0x2d1c]
+
+Breakpoint 1, main (argc=1, argv=0xae15f8) at pointer.c:11
+11              fprintf(stdout, "%s", pointer);
+(gdb) x/xw pointer
+0x61ff14:       0x6c6c6548
+(gdb) x/s pointer
+0x61ff14:       "Hello, world!\n"
+(gdb) print pointer
+$1 = 0x61ff14 "Hello, world!\n"
+(gdb) print &pointer
+$2 = (char **) 0x61ff2c
+```
+11行目にブレークポイントを設置、これはstrに"Hello, world!\n"をコピーし、
+その先頭をポインタ変数が設定された直後に処理が止まる。
+
+pointerの内容を文字列として表示してみる
+アドレス演算子を使用することで、ポインタ変数が0x61ff2cというアドレスに割り当てられているのがわかる
 
