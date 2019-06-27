@@ -4,10 +4,13 @@
 - [ダブルポインタとトリプルポインタ](#ダブルポインタとトリプルポインタ)
 		- [なに](#なに)
 - [多次元配列](#多次元配列)
+		- [ポインタのキャスト](#ポインタのキャスト)
 
 <!-- /TOC -->
 
 ### なに
+---
+
 - ダブルポインタ：
 	ポインタ変数のアドレスを格納できるポインタ変数
 - トリプルポインタ:
@@ -108,6 +111,7 @@ array, ptr, *ptr_double, **ptr_tripleで同じアドレスを表示し、%sで�
 ダブルポインタは多次元配列をポインタで表すときや関数からポインタをもらうときに使ったことがある。
 
 # 多次元配列
+---
 
 表のようなデータを使うときは2次元配列を利用する。
 Cには多次元配列は存在しないが配列の配列として配列を宣言することで実現する
@@ -184,3 +188,153 @@ int make_tuple(int tuple[][MAX_NUM])
    9  18  27  36  45  54  63  72  81  90
   10  20  30  40  50  60  70  80  90 100
 ```
+
+### ポインタのキャスト
+---
+
+ポインタの値はただのアドレスでしかないもののCコンパイラはポインタに対してデータ型を要求する。
+```C
+#include<stdio.h>
+
+int main(int argc, char const *argv[])
+{
+	char char_array[] = {'a', 'b', 'c', 'd', 'e'};
+	int int_array[] = {1, 2, 3, 4, 5};
+
+	char *char_pointer;
+	int *int_pointer;
+
+	char *char_ptr;
+	int *int_ptr;
+
+	char *char_ptr2;
+	int *int_ptr2;
+
+	char *char_ptr3;
+	int *int_ptr3;
+
+	char_pointer = char_array;
+	int_pointer = int_array;
+
+	char_ptr = int_array;
+	int_ptr = char_array;
+
+	char_ptr2 = (char *)int_array;
+	int_ptr2 = (int *)char_array;
+
+	char_ptr3 = (char *)int_array;
+	int_ptr3 = (int *)char_array;
+
+	for (size_t i = 0; i < sizeof(int_array)/sizeof(int); i++)
+	{
+		fprintf(stdout, "num_pointer is %p, num is %d\n", int_pointer, *int_pointer);
+		int_pointer += 1;
+	}
+	
+	for (size_t i = 0; i < sizeof(char_array)/sizeof(char); i++)
+	{
+		fprintf(stdout, "str_pointer is %p, str is %c\n", char_pointer, *char_pointer);
+		char_pointer += 1;
+	}
+
+	printf("\n");
+
+	for (size_t i = 0; i < sizeof(int_array)/sizeof(int); i++)
+	{
+		fprintf(stdout, "num_pointer is %p, num is %c\n", int_ptr, *int_ptr);
+		int_ptr += 1;
+	}
+	
+	for (size_t i = 0; i < sizeof(char_array)/sizeof(char); i++)
+	{
+		fprintf(stdout, "str_pointer is %p, str is %d\n", char_ptr, *char_ptr);
+		char_ptr += 1;
+	}
+
+	printf("\n");
+
+	for (size_t i = 0; i < sizeof(int_array)/sizeof(int); i++)
+	{
+		fprintf(stdout, "num_pointer is %p, num is %c\n", int_ptr2, *int_ptr2);
+		int_ptr2 += 1;
+	}
+	
+	for (size_t i = 0; i < sizeof(char_array)/sizeof(char); i++)
+	{
+		fprintf(stdout, "str_pointer is %p, str is %d\n", char_ptr2, *char_ptr2);
+		char_ptr2 += 1;
+	}
+
+	printf("\n");
+
+	for (size_t i = 0; i < sizeof(int_array)/sizeof(int); i++)
+	{
+		fprintf(stdout, "num_pointer is %p, num is %c\n", int_ptr3, *int_ptr3);
+		int_ptr3 = (int *)((char *)int_ptr3 + 1);
+	}
+	
+	for (size_t i = 0; i < sizeof(char_array)/sizeof(char); i++)
+	{
+		fprintf(stdout, "str_pointer is %p, str is %d\n", char_ptr3, *char_ptr3);
+		char_ptr3 = (char *)((int *)char_ptr3 + 1);
+	}
+	return 0;
+}
+
+```
+実行例
+```
+>ptr_type.exe
+num_pointer is 0061FF0C, num is 1
+num_pointer is 0061FF10, num is 2
+num_pointer is 0061FF14, num is 3
+num_pointer is 0061FF18, num is 4
+num_pointer is 0061FF1C, num is 5
+str_pointer is 0061FF07, str is a
+str_pointer is 0061FF08, str is b
+str_pointer is 0061FF09, str is c
+str_pointer is 0061FF0A, str is d
+str_pointer is 0061FF0B, str is e
+
+num_pointer is 0061FF07, num is a
+num_pointer is 0061FF0B, num is e
+num_pointer is 0061FF0F, num is
+num_pointer is 0061FF13, num is
+num_pointer is 0061FF17, num is
+str_pointer is 0061FF0C, str is 1
+str_pointer is 0061FF0D, str is 0
+str_pointer is 0061FF0E, str is 0
+str_pointer is 0061FF0F, str is 0
+str_pointer is 0061FF10, str is 2
+
+num_pointer is 0061FF07, num is a
+num_pointer is 0061FF0B, num is e
+num_pointer is 0061FF0F, num is
+num_pointer is 0061FF13, num is
+num_pointer is 0061FF17, num is
+str_pointer is 0061FF0C, str is 1
+str_pointer is 0061FF0D, str is 0
+str_pointer is 0061FF0E, str is 0
+str_pointer is 0061FF0F, str is 0
+str_pointer is 0061FF10, str is 2
+
+num_pointer is 0061FF07, num is a
+num_pointer is 0061FF08, num is b
+num_pointer is 0061FF09, num is c
+num_pointer is 0061FF0A, num is d
+num_pointer is 0061FF0B, num is e
+str_pointer is 0061FF0C, str is 1
+str_pointer is 0061FF10, str is 2
+str_pointer is 0061FF14, str is 3
+str_pointer is 0061FF18, str is 4
+str_pointer is 0061FF1C, str is 5
+
+```
+実行結果はループ内でポインタに1を加算しながら表示を行う。
+ポインタには1という値を加算しているだけだが、ポインタのアドレスはintとcharで違った量だけインクリメントされている。(文字は1byte整数は4byte)
+また、ポインタに整合性のない型の値が格納されているアドレスを代入しようとするとコンパイラが警告を出す。
+ただ、あくまで警告なので実行ファイルはできるし、もちろん実行できる(想定している結果にはならないと思うが)。
+この警告はキャストを使いポインタの型をその場で変更すると表示されない。(実行結果はキャストしなかったときと同じになる)
+
+ポインタに整合性の無い型の値が格納されたアドレスを代入すると思わぬところにアクセスしてしまう。
+これはキャストを使い、ポインタの型をその場で変更することで回避できる。
