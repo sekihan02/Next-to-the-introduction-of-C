@@ -8,6 +8,7 @@
 	- [1.3. サンプルコードを動かしてみる](#13-サンプルコードを動かしてみる)
 	- [1.4. objdump](#14-objdump)
 	- [1.5. GDB](#15-gdb)
+	- [オーバーフロー](#オーバーフロー)
 
 <!-- /TOC -->
 
@@ -362,3 +363,82 @@ $2 = (char **) 0x61ff2c
 pointerの内容を文字列として表示してみる
 アドレス演算子を使用することで、ポインタ変数が0x61ff2cというアドレスに割り当てられているのがわかる
 
+## オーバーフロー
+C言語は簡潔に自由に書くことができ、プログラマがコントロールできる。
+これはメリットだがデメリットでもある。
+つまり、変数にデータを代入する場合、そのデータが代入先のメモリ領域内に収まっていないプログラムを書き、これを実行してクラッシュさせることもできる。
+8byteの領域に10byteのデータを格納してみる
+
+```C
+/* 引数に10byte文字与えてクラッシュさせる */
+
+#include<stdio.h>
+#include<string.h>
+
+int main(int argc, char const *argv[])
+{
+	char buffer_one[8] = {0};
+	char buffer_two[8] = {0};
+
+	strcpy(buffer_one, "one");
+	puts("buffer_one strcpy()");
+	fprintf(stdout, "buffer_one     address:%p, string:%s\n", buffer_one, buffer_one);
+	fprintf(stdout, "buffer_two     address:%p, string:%s\n\n", buffer_two, buffer_two);
+
+	strcpy(buffer_two, "0123456789");
+	puts("buffer_two strcpy()");
+	fprintf(stdout, "buffer_one num address:%p, string:%s\n", buffer_one, buffer_one);
+	fprintf(stdout, "buffer_two num address:%p, string:%s\n\n", buffer_two, buffer_two);
+
+	if (argc <= 1)
+	{
+		return 0;
+	}
+	strcpy(buffer_one, argv[1]);
+	fprintf(stdout, "buffer_one arg address:%p, string:%s\n", buffer_one, buffer_one);
+	fprintf(stdout, "buffer_two arg address:%p, string:%s\n", buffer_two, buffer_two);
+
+	return 0;
+}
+```
+実行例
+```
+>a.exe 0123456789
+buffer_one strcpy()
+buffer_one     address:0061FF28, string:one
+buffer_two     address:0061FF20, string:
+
+buffer_two strcpy()
+buffer_one num address:0061FF28, string:89
+buffer_two num address:0061FF20, string:0123456789
+
+argv 10byte
+buffer_one arg address:0061FF28, string:0123456789
+buffer_two arg address:0061FF20, string:012345670123456789
+
+>a.exe abcdefghij
+buffer_one strcpy()
+buffer_one     address:0061FF28, string:one
+buffer_two     address:0061FF20, string:
+
+buffer_two strcpy()
+buffer_one num address:0061FF28, string:89
+buffer_two num address:0061FF20, string:0123456789
+
+argv 10byte
+buffer_one arg address:0061FF28, string:abcdefghij
+buffer_two arg address:0061FF20, string:01234567abcdefghij
+
+>a.exe  111111111111111111111111111111111111111111111111111111111111111111111111111111111
+buffer_one strcpy()
+buffer_one     address:0061FF28, string:one
+buffer_two     address:0061FF20, string:
+
+buffer_two strcpy()
+buffer_one num address:0061FF28, string:89
+buffer_two num address:0061FF20, string:0123456789
+
+```
+メモリのアドレスをみると、buffer_oneはbuffer_twoの後に割り当てられている。
+このため、buffer_twoに10byteのデータを格納するとオーバーフローした最後の2byteがbuffer_oneに書き込まれる。
+さらに大きなデータを引数に指定すると、プログラムはクラッシュし、異常終了する。
