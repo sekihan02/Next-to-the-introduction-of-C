@@ -4,7 +4,7 @@
 - [Makefileとプログラムの分割](#makefileとプログラムの分割)
 		- [プログラムの分割](#プログラムの分割)
 		- [make Makefile](#make-makefile)
-			- [Makefileの実行方法](#makefileの実行方法)
+		- [Makefileの実行方法](#makefileの実行方法)
 		- [ファイルを分割したプログラムを作る](#ファイルを分割したプログラムを作る)
 				- [Makefileの書き方](#makefileの書き方)
 				- [コマンドライン引数](#コマンドライン引数)

@@ -17,7 +17,7 @@
 	ポインタ変数のアドレスを格納したポインタ変数のアドレスを格納するポインタ変数
 
 説明だけで理解できないのでコードで確認してみる
-- ptr_double
+
 ```C
 #include <stdio.h>
 
@@ -72,35 +72,36 @@ int main(int argc, char const *argv[])
 ```
 実行結果例
 ```
-驟榊・縺ｮ陦ｨ遉ｺ
-array 0061FF14
+配列の表示
+array 0xffffcbf4
 array ABC
 array[0] A
 array[1] B
 array[2] C
 array[3]
 
-繝昴う繝ｳ繧ｿ縺ｮ陦ｨ遉ｺ
-ptr 0061FF14
-&ptr 0061FF18
+ポインタの表示
+ptr 0xffffcbf4
+&ptr 0xffffcbe8
 ptr ABC
 *(ptr + 0) A
 *(ptr + 1) B
 *(ptr + 2) C
 *(ptr + 3)
 
-繝繝悶Ν繝昴う繝ｳ繧ｿ縺ｮ陦ｨ遉ｺ
-*ptr_double 0061FF14
-&ptr_double 0061FF1C
+ダブルポインタの表示
+ptr_double 0xffffcbe8
+*ptr_double 0xffffcbf4
+&ptr_double 0xffffcbe0
 *ptr_double ABC
-ptr_double a
 *(*ptr_double + 0) A
 *(*ptr_double + 1) B
 *(*ptr_double + 2) C
 *(*ptr_double + 3)
 
-繝医Μ繝励Ν繝昴う繝ｳ繧ｿ縺ｮ陦ｨ遉ｺ
-**ptr_triple 0061FF14
+トリプルポインタの表示
+ptr_triple 0xffffcbe0
+**ptr_triple 0xffffcbf4
 **ptr_triple ABC
 *(**ptr_triple + 0) A
 *(**ptr_triple + 1) B
@@ -108,7 +109,8 @@ ptr_double a
 *(**ptr_triple + 3)
 ```
 array, ptr, *ptr_double, **ptr_tripleで同じアドレスを表示し、%sで文字列ABCと表示される。
-ダブルポインタは多次元配列をポインタで表すときや関数からポインタをもらうときに使ったことがある。
+ダブルポインタは多次元配列をポインタで表すときや関数からポインタをもらうときに使用した経験がある。
+トリプルポインタはちょっとしたデバッグで使用したことがあるが、可読性が悪くなるので極力使わない方がよいと思う。
 
 # 多次元配列
 ---
@@ -117,14 +119,14 @@ array, ptr, *ptr_double, **ptr_tripleで同じアドレスを表示し、%sで�
 Cには多次元配列は存在しないが配列の配列として配列を宣言することで実現する
 
 次のような表をソースで書いてみる
-()
-|   | 0 | 1 | 2 | 3 | 4 |
+
+| 1 | 2 | 3 | 4 | ... | 10 |
 |---|---|---|---|---|---|
-| 0 | 1 | 2 | 3 | 4 | 5 |
-| 1 | 2  | 4 |  |   |   |
-| 2 |   |   |   |   |   |
-| 3 |   |   |   |   |   |
-| 4 |   |   |   |   | 16 |
+| 2 | 4 | 6 | 8 | ... | 20 |
+| 3 | 6  | 9 |  |   |   |
+| . |   |   |   |   |   |
+| . |   |   |   |   |   |
+| 10 |   |   |   |   | 100 |
 
 ```C
 #include<stdio.h>

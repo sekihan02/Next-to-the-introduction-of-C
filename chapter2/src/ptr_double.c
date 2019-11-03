@@ -20,27 +20,28 @@ int main(int argc, char const *argv[])
 	fprintf(stdout, "ptr %p\n", ptr);
 	fprintf(stdout, "&ptr %p\n", &ptr);
 	fprintf(stdout, "ptr %s\n", ptr);
-	for (int i = 0; i < sizeof(ptr); i++)
+	for (int i = 0; i < sizeof(array); i++)
 	{
 		fprintf(stdout, "*(ptr + %d) %c\n", i, *(ptr+i));
 	}
 
 	puts("\nダブルポインタの表示");
+	fprintf(stdout, "ptr_double %p\n", ptr_double);
 	fprintf(stdout, "*ptr_double %p\n", *ptr_double);
 	fprintf(stdout, "&ptr_double %p\n", &ptr_double);
-	fprintf(stdout, "*ptr_double %s\n", *ptr_double);
 
-	fprintf(stdout, "ptr_double %s\n", ptr_double);
-	
-	for (int i = 0; i < sizeof(*ptr_double); i++)
+	fprintf(stdout, "*ptr_double %s\n", *ptr_double);
+		for (int i = 0; i < sizeof(array); i++)
 	{
 		fprintf(stdout, "*(*ptr_double + %d) %c\n", i, *(*ptr_double+i));
 	}
 
 	puts("\nトリプルポインタの表示");
+	fprintf(stdout, "ptr_triple %p\n", ptr_triple);
+
 	fprintf(stdout, "**ptr_triple %p\n", **ptr_triple);
 	fprintf(stdout, "**ptr_triple %s\n", **ptr_triple);
-	for (int i = 0; i < sizeof(**ptr_triple); i++)
+	for (int i = 0; i < sizeof(array); i++)
 	{
 		fprintf(stdout, "*(**ptr_triple + %d) %c\n", i, *(**ptr_triple+i));
 	}
